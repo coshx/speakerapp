@@ -62,7 +62,7 @@ SpeakerApp = {
     var newTime = (ms % (app.audio.duration*1000)) / 1000.0;
     app.skew += newTime - app.audio.currentTime;
 
-    if (app.skewCount > 10) {
+    if (app.skewCount > 50) {
       app.skew = app.skew / app.skewCount;
       app.skewCount = 0;
       app.recalculatingSkew = false;
