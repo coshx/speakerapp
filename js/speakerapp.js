@@ -20,7 +20,7 @@ SpeakerApp = {
     app.audio = new Audio();
     app.audio.preload = "auto";
     app.audio.loop = true;
-    app.audio.src = "media/night-is-young.mp3";
+    app.audio.src = "media/rainbow.mp3";
 
     $(app.audio).on("canplaythrough", function() {
       $("#play").removeClass("disabled");
