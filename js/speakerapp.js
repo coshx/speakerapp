@@ -14,7 +14,6 @@ SpeakerApp = {
     app.playing = false;
     app.skew = 0;
     app.skewCount = 0;
-    app.recalculateSkew = true;
     app.syncInterval = 30;
 
     app.audio = new Audio();
@@ -51,8 +50,6 @@ SpeakerApp = {
 
   calculateSkew: function() {
     var app = SpeakerApp;
-    app.recalculateSkew = false;
-    app.recalculatingSkew = true;
 
     app.audio.volume = 0;
     app.skewCount++;
@@ -62,13 +59,16 @@ SpeakerApp = {
     var newTime = (ms % (app.audio.duration*1000)) / 1000.0;
     app.skew += newTime - app.audio.currentTime;
 
-    if (app.skewCount > 50) {
-      app.skew = app.skew / app.skewCount;
-      app.skewCount = 0;
-      app.recalculatingSkew = false;
+    if (app.skewCount % 10 == 0) {
+      app.skew = app.skew / 10;
       app.audio.currentTime = app.audio.currentTime + app.skew;
-      app.audio.volume = 1;
       console.log("Skew is " + app.skew);
+      app.skew = 0;
+    }
+
+    if (app.skewCount == 30) {
+      app.skewCount = 0;
+      app.audio.volume = 1;
     } else {
       setTimeout(app.calculateSkew, app.syncInterval);
     }
