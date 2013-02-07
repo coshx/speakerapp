@@ -22,19 +22,21 @@ SpeakerApp = {
     app.audio.loop = true;
     app.audio.src = "media/night-is-young.mp3";
 
-    $(app.audio).on("loadeddata", function() {
-      $("#play").prop("disabled", false);
+    $(app.audio).on("canplaythrough", function() {
+      $("#play").removeClass("disabled");
       app.audio_loaded = true;
     });
   },
 
   initPlayHandler: function() {
     var app = this;
-    $('#play').on('click', function() {
+    $('#play').on('click', function(e) {
       if (app.playing) {
         app.audio.pause();
         $("#play").text("Play");
-        app.playing = false
+        app.playing = false;
+      } else if ($('#play').hasClass('disabled')) {
+        // do nothing
       } else {
         app.audio.volume = 0;
         app.audio.play();
@@ -43,6 +45,7 @@ SpeakerApp = {
         app.calculateSkew();
         $("#play").text("Pause");
       }
+      e.preventDefault();
     });
   },
 

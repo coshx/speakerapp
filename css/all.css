@@ -1,0 +1,9 @@
+a#play {
+  font-size: 48px;
+  text-decoration: none;
+  color: #22f;
+}
+
+a#play.disabled {
+  color: #ddd;
+}
