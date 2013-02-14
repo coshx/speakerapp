@@ -72,7 +72,7 @@ SpeakerApp = {
     var runtime_offset = 2 ;
     var local_time1 = new Date().getTime() ;
     var server_time_response ;
-    $.ajax({ url:  "http://desolate-mesa-8298.herokuapp.com/", dataType: 'json', async: false, success: function(data) {
+    $.ajax({ url:  "/time", dataType: 'json', async: false, success: function(data) {
         server_time_response = data["time"] ;}});
     var local_time2 = new Date().getTime() ;
     app.latency += local_time2 - local_time1 - runtime_offset ;
@@ -86,7 +86,7 @@ SpeakerApp = {
     var runtime_offset = 2 ;
     var local_time1 = new Date().getTime() ;
     var server_time_response ;
-    $.ajax({ url:  "http://desolate-mesa-8298.herokuapp.com/", dataType: 'json', async: false, success: function(data) {
+    $.ajax({ url:  "/time", dataType: 'json', async: false, success: function(data) {
       server_time_response = data["time"] ;}});
     var local_time2 = new Date().getTime() ;
     var latency = local_time2 - local_time1 - runtime_offset ;
