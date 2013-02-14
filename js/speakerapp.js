@@ -103,14 +103,14 @@ SpeakerApp = {
 
     app.skew += newTime - app.audio.currentTime;
 
-    if (app.skewCount % 1 == 0) {   //for some reason it seems to work better like this when reading from server
-      app.skew = app.skew / 1;      // "
+    if (app.skewCount % 20 == 0) {   //for some reason it seems to work better like this when reading from server
+      app.skew = app.skew / 20;      // "
       app.audio.currentTime = app.audio.currentTime + app.skew;
-      console.log("Skew is " + app.skew);
+
       app.skew = 0;
     }
 
-    if (app.skewCount == 1) {   //for some reason it seems to work better like this when reading from server
+    if (app.skewCount == 20) {   //for some reason it seems to work better like this when reading from server
       app.skewCount = 0;
       app.audio.volume = 1;
     } else {
