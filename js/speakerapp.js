@@ -21,7 +21,7 @@ SpeakerApp = {
     app.audio = new Audio();
     app.audio.preload = "auto";
     app.audio.loop = true;
-    app.audio.src = "media/creed.mp3";
+    app.audio.src = "media/thirdday.mp3";
 
     $(app.audio).on("canplaythrough", function() {
       $("#play").removeClass("disabled");
@@ -32,7 +32,8 @@ SpeakerApp = {
   initPlayHandler: function() {
     var app = this;
     $('#sync').on('click', function(e) {
-      if($('#play').hasClass('disabled')){
+      if(!$('#play').hasClass('disabled')){
+        app.stop() ;
         app.play() ;
       }
       e.preventDefault();
