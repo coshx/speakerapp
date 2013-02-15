@@ -26,12 +26,12 @@ SpeakerApp = {
     app.audio = new Audio();
     app.audio.preload = "auto";
     app.audio.loop = true;
-    app.audio.src = "media/thirdday.mp3";
+    app.audio.src = "media/rainbow.mp3";
 
     $(app.audio).on("canplaythrough", function() {
       $("#play").removeClass("disabled");
-      app.audio_loaded = true;
-    });
+       app.audio_loaded = true;
+      });
   },
 
   initPlayHandler: function() {
@@ -66,7 +66,7 @@ SpeakerApp = {
     //app.clockSyncExample() ;
     app.calculateSkew();
   },
-  stop:function(){
+  mute:function(){
     var app = SpeakerApp;
     app.audio.pause();
     $("#play").text("Play");
