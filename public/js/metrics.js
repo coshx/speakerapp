@@ -39,7 +39,7 @@ App = {
     app.local_time = new Date().getTime() ;
     app.lag = (app.local_time - app.begin_time);
     app.skew = app.local_time - app.server_time_response ;
-    app.logging += "total local lag: "+app.lag+", "+"local_time - server_time: "+app.skew+"\n"
+    app.logging += "total latency: "+app.lag+", "+"local_time - server_time: "+app.skew+"\n"
 
     if(app.latencyCount<=20){
      setTimeout(app.clockSkew,100) ;

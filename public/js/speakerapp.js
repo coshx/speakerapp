@@ -10,12 +10,8 @@ speakerApp = {
     app.audio = new Audio();
     app.audio.volume = 0;
     app.audio.src = "media/rainbow.mp3";
-    app.syncInterval_short = 500;
-    app.syncInterval_long = 2000;
+    app.syncInterval = 2000;
     app.milliseconds_in_a_year = 1000*60*60 ;
-    app.current_audio_position = false ;
-    app.playing = false ;
-    app.counter = 0 ;
 
     $('#play').on('click', function(e) {
       var app = speakerApp;
@@ -25,12 +21,12 @@ speakerApp = {
       $("#play").addClass("disabled");
     });
   },
-  serverLog:function(local_time, current_position){
+  serverLog:function(lag, skew){
     var app = speakerApp;
     $.ajax({
       type: "POST",
       url: "/post_start_time",
-      data: {local_time: local_time, audio_position: current_position},
+      data: {latency: lag, skew: skew},
       dataType:  'json'
     });
   },
@@ -40,12 +36,14 @@ speakerApp = {
     $.ajax({ url:  "/time", dataType: 'json', async: false, success: function(data) {
       app.server_time_response = data["time"] ;
     }});
-    app.time = new Date().getTime() ;
-    app.skew = app.time - app.server_time_response ;
     app.audio.currentTime  = ((app.server_time_response % app.milliseconds_in_a_year) % app.song_duration) * 0.001 ;
     app.audio.volume = 1 ;
-    app.serverLog(app.time, app.current_audio_position) ;
-    setTimeout(app.skewSeek,app.syncInterval_long) ;
+    app.time = new Date().getTime() ;
+    app.skew = app.time - app.server_time_response ;
+    app.lag = app.time - app.begin_time ;
+    app.serverLog(app.lag, app.skew) ;
+    console.log("latency: "+app.lag+", skew: "+app.skew) ;
+    setTimeout(app.skewSeek,app.syncInterval) ;
   },
   calculateSkew: function() {
     var app = speakerApp;
