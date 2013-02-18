@@ -11,7 +11,7 @@ get '/time' do
 end
 
 post '/post_start_time' do
-  logger.info("{latency: #{params[:latency]}, skew: #{params[:skew]}}" )
+  logger.info("{id: #{params[:id]}, latency: #{params[:latency]}, skew: #{params[:skew]}}" )
 end
 
 

@@ -12,6 +12,7 @@ speakerApp = {
     app.audio.src = "media/rainbow.mp3";
     app.syncInterval = 2000;
     app.milliseconds_in_a_year = 1000*60*60 ;
+    app.id = (new Date().getTime() % app.milliseconds_in_a_year)
 
     $('#play').on('click', function(e) {
       var app = speakerApp;
@@ -26,7 +27,7 @@ speakerApp = {
     $.ajax({
       type: "POST",
       url: "/post_start_time",
-      data: {latency: lag, skew: skew},
+      data: {id: app.id, latency: lag, skew: skew},
       dataType:  'json'
     });
   },
