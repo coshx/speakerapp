@@ -62,8 +62,8 @@ var Play = {
       var currentSongTime = (currentTime % duration + Sync.skew) / 1000;
 
       try {
-        Play.audio.currentTime = currentSongTime;
         Play.audio.play();
+        Play.audio.currentTime = currentSongTime;
       } catch(err) {
         console.log("Caught " + err + ", retrying...");
         setTimeout(Play.play, 1000);
