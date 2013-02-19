@@ -18,7 +18,7 @@ speakerApp = {
       var app = speakerApp;
       app.audio.volume = 0 ;
       app.audio.play();
-      app.calculateSkew() ;
+      app.wait() ;
       $("#play").addClass("disabled");
     });
   },
@@ -41,15 +41,15 @@ speakerApp = {
     app.audio.volume = 1 ;
     app.time = new Date().getTime() ;
     app.skew = app.time - app.server_time_response ;
-    app.lag = app.time - app.begin_time ;
-    app.serverLog(app.lag, app.skew) ;
-    console.log("latency: "+app.lag+", skew: "+app.skew) ;
+    app.latency = app.time - app.begin_time ;
+    app.serverLog(app.latency, app.skew) ;
+    console.log("latency: "+app.latency+", local_time - server_time: "+app.skew) ;
     setTimeout(app.skewSeek,app.syncInterval) ;
   },
-  calculateSkew: function() {
+  wait: function() {
     var app = speakerApp;
     if(app.audio.currentTime==0){ //(fix for mobile safari block on pre-loading - 'waits til it starts playing')
-     setTimeout(app.calculateSkew, 500);
+     setTimeout(app.wait, 500);
     }else{
      app.song_duration = app.audio.duration*1000 ;
      app.skewSeek() ;
