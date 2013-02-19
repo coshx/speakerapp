@@ -48,8 +48,11 @@ var Play = {
   audio: null,
 
   play: function() {
-    Play.audio = new Audio();
-    Play.audio.src = Play.src;
+    if (Play.audio == null) {
+      Play.audio = new Audio();
+      Play.audio.src = Play.src;
+    }
+
     setTimeout(function() {
       $("#play").text("Playing...");
       $("#pause").text("Pause");
@@ -57,8 +60,14 @@ var Play = {
       var duration = Play.audio.duration * 1000;
       var currentTime = new Date().getTime();
       var currentSongTime = (currentTime % duration + Sync.skew) / 1000;
-      Play.audio.currentTime = currentSongTime;
-      Play.audio.play();      
+
+      try {
+        Play.audio.currentTime = currentSongTime;
+        Play.audio.play();
+      } catch(err) {
+        console.log("Caught " + err + ", retrying...");
+        setTimeout(Play.play, 1000);
+      }
     }, 5000);
   },
 
@@ -80,7 +89,7 @@ $(function() {
     if ($("#play").hasClass("disabled")) {
       return;
     }
-    
+
     Play.play();
     $("#play").addClass("disabled");
     $("#play").text("loading...");
