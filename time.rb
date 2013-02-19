@@ -24,8 +24,8 @@ get '/guess' do
 
   # simulate a delay
   # uniform distribution, avg. 100, ±25
-  ms_to_sleep = 100+rand()*50-25
-  sleep(ms_to_sleep / 1000.0)
+  #ms_to_sleep = 100+rand()*50-25
+  #sleep(ms_to_sleep / 1000.0)
 
   {:skew => skew}.to_json
 end
