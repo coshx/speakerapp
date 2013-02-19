@@ -54,10 +54,14 @@ var Play = {
       Play.audio = new Audio();
       Play.audio.src = Play.src;
       Play.audio.play();
+      setTimeout(function() {
+        Play.audio.pause();
+      }, 1);
     }
 
-    if (Play.audio.currentTime == 0) {
-      setTimeout(Play.play, 100);
+    if (Play.audio.readyState !== 4) { // HAVE_ENOUGH_DATA
+      console.log("waiting for enough data...");
+      setTimeout(Play.play, 500);
       return;
     }
 
@@ -69,6 +73,7 @@ var Play = {
     var currentSongTime = (currentTime % duration + Sync.skew) / 1000;
 
     Play.audio.currentTime = currentSongTime;
+    Play.audio.play();
   },
 
   pause: function() {
