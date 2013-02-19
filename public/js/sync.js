@@ -4,6 +4,7 @@ var Sync = {
   maxGuesses: 0,
   lastGuessTime: 0,
   skewError: 0,
+  maxAllowedError: 15,
 
   getSkew: function(maxGuesses) {
     Sync.maxGuesses = maxGuesses;
@@ -32,16 +33,64 @@ var Sync = {
 
     if (Sync.guesses >= Sync.maxGuesses) {
       $("#skew").text("Skew: " + Sync.skew + ", Error: ±" + Sync.skewError);
+      if (Math.abs(Sync.skewError) < Sync.maxAllowedError) {
+        $("#play").removeClass("disabled");
+      }
     } else {
       Sync.makeGuess(guess);
     }
   }
+};
 
+
+var Play = {
+  src: "media/rainbow.mp3",
+  audio: null,
+
+  play: function() {
+    Play.audio = new Audio();
+    Play.audio.src = Play.src;
+    setTimeout(function() {
+      $("#play").text("Playing...");
+      $("#pause").text("Pause");
+
+      var duration = Play.audio.duration * 1000;
+      var currentTime = new Date().getTime();
+      var currentSongTime = (currentTime % duration + Sync.skew) / 1000;
+      Play.audio.currentTime = currentSongTime;
+      Play.audio.play();      
+    }, 5000);
+  },
+
+  pause: function() {
+    if (Play.audio != null) {
+      Play.audio.pause();
+    }
+  }
 };
 
 $(function() {
   $("#calculateSkew").on("click", function(e) {
     Sync.getSkew($("#maxGuesses").val());
     e.preventDefault();
+  });
+
+  $("#play").on("click", function(e) {
+    e.preventDefault();
+    if ($("#play").hasClass("disabled")) {
+      return;
+    }
+    
+    Play.play();
+    $("#play").addClass("disabled");
+    $("#play").text("loading...");
+  });
+
+  $("#pause").on("click", function(e) {
+    e.preventDefault();
+    Play.pause();
+    $("#pause").text("");
+    $("#play").text("Play");
+    $("#play").removeClass("disabled");
   });
 });
