@@ -9,7 +9,7 @@ var Sync = {
     Sync.maxGuesses = maxGuesses;
     Sync.guesses = 0;
     Sync.skew = 0;
-    var currentTime = new Date().getTime() / 1000;
+    var currentTime = new Date().getTime();
 
     // uniform distribution, avg. 100, ±25
     var initialRequestTime = 100+Math.random()*50-25;
@@ -22,7 +22,7 @@ var Sync = {
   },
 
   handleGuessResponse: function(serverResponse) {
-    var currentTime = new Date().getTime() / 1000;
+    var currentTime = new Date().getTime();
     var totRequestTime = currentTime - Sync.lastGuessTime;
     Sync.skew = Sync.skew + (serverResponse.skew/2);
     Sync.skewError = serverResponse.skew;

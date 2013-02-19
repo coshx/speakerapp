@@ -19,13 +19,13 @@ get '/guess' do
   client_time = params[:client].to_f
   request_time = params[:requestTime].to_f
 
-  current_time = Time.now.to_i
+  current_time = Time.now.to_f * 1000
   skew = (current_time - client_time - request_time)
 
   # simulate a delay
   # uniform distribution, avg. 100, ±25
-  #ms_to_sleep = 100+rand()*50-25
-  #sleep(ms_to_sleep / 1000.0)
+  ms_to_sleep = 100+rand()*50-25
+  sleep(ms_to_sleep / 1000.0)
 
   {:skew => skew}.to_json
 end
