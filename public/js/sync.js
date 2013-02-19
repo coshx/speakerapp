@@ -48,32 +48,33 @@ var Play = {
   audio: null,
 
   play: function() {
+    $("#play").text("Loading...");
+
     if (Play.audio == null) {
       Play.audio = new Audio();
       Play.audio.src = Play.src;
+      Play.audio.play();
     }
 
-    setTimeout(function() {
-      $("#play").text("Playing...");
-      $("#pause").text("Pause");
+    if (Play.audio.currentTime == 0) {
+      setTimeout(Play.play, 50);
+      return;
+    }
 
-      var duration = Play.audio.duration * 1000;
-      var currentTime = new Date().getTime();
-      var currentSongTime = (currentTime % duration + Sync.skew) / 1000;
+    $("#play").text("Playing...");
+    $("#pause").text("Pause");
 
-      try {
-        Play.audio.play();
-        Play.audio.currentTime = currentSongTime;
-      } catch(err) {
-        console.log("Caught " + err + ", retrying...");
-        setTimeout(Play.play, 1000);
-      }
-    }, 5000);
+    var duration = Play.audio.duration * 1000;
+    var currentTime = new Date().getTime();
+    var currentSongTime = (currentTime % duration + Sync.skew) / 1000;
+
+    Play.audio.currentTime = currentSongTime;
   },
 
   pause: function() {
     if (Play.audio != null) {
       Play.audio.pause();
+      Play.audio = null;
     }
   }
 };
