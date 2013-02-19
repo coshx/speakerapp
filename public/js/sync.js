@@ -7,32 +7,35 @@ var Sync = {
   maxAllowedError: 15,
 
   getSkew: function(maxGuesses) {
+    var currentTime, initialRequestTime;
+    currentTime = Sync.lastGuessTime = new Date().getTime();
     Sync.maxGuesses = maxGuesses;
     Sync.guesses = 0;
     Sync.skew = 0;
-    var currentTime = new Date().getTime();
 
     // uniform distribution, avg. 100, ±25
-    var initialRequestTime = 100+Math.random()*50-25;
+    initialRequestTime = 100+Math.random()*50-25;
     Sync.makeGuess({client: currentTime, requestTime: initialRequestTime});
   },
 
   makeGuess: function(currentGuess) {
-    Sync.lastGuessTime = currentGuess.client;
     $.get("/guess", currentGuess, Sync.handleGuessResponse);
   },
 
   handleGuessResponse: function(serverResponse) {
-    var currentTime = new Date().getTime();
-    var totRequestTime = currentTime - Sync.lastGuessTime;
-    Sync.skew = Sync.skew + (serverResponse.skew/2);
+    var currentTime, totRequestTime, guess;
+    currentTime = new Date().getTime();
+    totRequestTime = currentTime - Sync.lastGuessTime;
+    Sync.skew = Sync.skew + (0.63*serverResponse.skew);
     Sync.skewError = serverResponse.skew;
 
-    var guess = {client: currentTime + Sync.skew, requestTime: totRequestTime/2};
+    Sync.lastGuessTime = currentTime;
+    guess = {client: currentTime + Sync.skew, requestTime: totRequestTime/2};
     Sync.guesses++;
 
     if (Sync.guesses >= Sync.maxGuesses) {
       $("#skew").text("Skew: " + Sync.skew + ", Error: ±" + Sync.skewError);
+      console.log("Est. Server Time: " + (new Date().getTime() + Sync.skew));
       if (Math.abs(Sync.skewError) < Sync.maxAllowedError) {
         $("#play").removeClass("disabled");
       }
@@ -45,6 +48,7 @@ var Sync = {
 
 var Play = {
   src: "media/rainbow.mp3",
+  duration: 222000, // hardcode since seeing 300ms diff btw browsers
   audio: null,
 
   play: function() {
@@ -68,12 +72,16 @@ var Play = {
     $("#play").text("Playing...");
     $("#pause").text("Pause");
 
-    var duration = Play.audio.duration * 1000;
-    var currentTime = new Date().getTime();
-    var currentSongTime = (currentTime % duration + Sync.skew) / 1000;
+    var currentServerTime;
+    currentServerTime = new Date().getTime() + Sync.skew;
+    var currentSongTime;
+    currentSongTime = (currentServerTime % Play.duration) / 1000;
 
-    Play.audio.currentTime = currentSongTime;
     Play.audio.play();
+
+    console.log("Current server time is: " + currentServerTime);
+    console.log("Setting currentTime to " + currentSongTime);
+    Play.audio.currentTime = currentSongTime;
   },
 
   pause: function() {
