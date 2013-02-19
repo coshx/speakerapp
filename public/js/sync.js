@@ -57,7 +57,7 @@ var Play = {
     }
 
     if (Play.audio.currentTime == 0) {
-      setTimeout(Play.play, 50);
+      setTimeout(Play.play, 100);
       return;
     }
 
