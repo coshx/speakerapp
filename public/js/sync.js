@@ -70,92 +70,106 @@ var Sync = {
 };
 
 var Play = {
-  title: "",
-  src: null,
+  title: null,
+  url: null,
   start_at: null,
   duration: 0,
   audio: null,
 
-  fetchSrcData: function(){
-    console.log('fetchSrcData') ;
-    $.get("/song_info", Play.handleFetchSrcResponse);
-  },
-  handleFetchSrcResponse: function(serverResponse){
-    console.log('handleFetchSrcResponse')
-    Play.title = serverResponse.title  ;
-    Play.src = serverResponse.url  ;
-    Play.start_at = serverResponse.start_at  ;
-    Play.duration = serverResponse.duration  ;
-    Play.play() ;
+  fetchAudioData: function(){
+    $.get("/song_info", function(serverResponse){
+      Play.title = serverResponse.title  ;
+      Play.url = serverResponse.url  ;
+      Play.start_at = serverResponse.start_at  ;
+      Play.duration = serverResponse.duration  ;
+      if(Play.url=="") console.log("no feed...");
+      else Play.play() ;
+    });
   },
   play: function() {
-
-    if(Play.src==null){
-      Play.src = Play.fetchSrcData() ;
-      return ;
-    }
     $("#play").text("Loading...");
 
     if (Play.audio == null) {
-      Play.audio = new Audio();
-      Play.audio.src = Play.src;
-      Play.audio.play();
-      setTimeout(function() {
-        Play.audio.pause();
-      }, 1);
+      if(Play.url==null){
+        Play.url = Play.fetchAudioData() ;
+        return ;
+      }else{
+        Play.audio = new Audio();
+        Play.audio.src = Play.url;
+        Play.audio.play();
+        setTimeout(function() {}, 1);
+      }
     }
-
     if (Play.audio.readyState !== 4) { // HAVE_ENOUGH_DATA
       console.log("waiting for enough data...");
       setTimeout(Play.play, 500);
       return;
     }
-
     $("#play").text("Playing "+Play.title);
-    $("#pause").text("Pause");
+    $("#stop").text("Stop");
+    $("#stop").removeClass("disabled");
 
     var currentServerTime ;
     currentServerTime = new Date().getTime() + Sync.skew;
     var currentSongTime ;
-    currentSongTime = ((currentServerTime - Play.start_at) % Play.duration)/1000 ;                                            //(currentServerTime % Play.duration) ;
+    currentSongTime = ((currentServerTime - Play.start_at) % Play.duration)/1000 ;
 
-    Play.audio.play();
+    Play.audio.currentTime = currentSongTime;
 
     console.log("Current server time is: " + currentServerTime);
     console.log("Setting currentTime to " + currentSongTime);
-    Play.audio.currentTime = currentSongTime;
-  },
-
-  pause: function() {
+   },
+  stop: function() {
     if (Play.audio != null) {
+      $("#stop").text("");
+      $("#play").text("Subscribe")
+      $("#play").removeClass("disabled");
       Play.audio.pause();
+      Play.url = null  ;
       Play.audio = null;
     }
   }
 };
 
-$(function() {
+PlayList = {
+  songs: [
+   {title:"Rainbow",url: "http://speakerapp.herokuapp.com/media/rainbow.mp3", duration:222000},
+   {title:"Thirdday",url: "http://speakerapp.herokuapp.com/media/thirdday.mp3", duration:210000}
+  ],
+  init: function() {
+    $(function() {
+      $.each(PlayList.songs, function(index, song) {
+        $("#song_list option[id='"+index+"']").text(PlayList.songs[index].title);
+        $("#song_list option[id='"+index+"']").val(index);
+      });
 
-  $("#play").on("click", function(e) {
-    e.preventDefault();
-    if ($("#play").hasClass("disabled")) {
-      return;
-    }
+      $("#song_list").on("change", function(e) {
+        e.preventDefault();
+        var selected_index = $('#song_list :selected').val() ;
+        $.post('/song_info', PlayList.songs[selected_index]);
+        Play.stop() ;
+        $("#play").text("Broadcast") ;
+      });
 
-    Play.play();
-    $("#play").addClass("disabled");
-    $("#play").text("loading...");
-  });
+      $("#play").on("click", function(e) {
+        e.preventDefault();
+        if ($("#play").hasClass("disabled")) {
+        return;
+        }
+        Play.play();
+        $("#play").addClass("disabled");
+        $("#play").text("loading...");
+      });
 
-  $("#pause").on("click", function(e) {
-    e.preventDefault();
-    Play.pause();
-    $("#pause").text("");
-    $("#play").text("Play");
-    $("#play").removeClass("disabled");
-  });
-});
+      $("#stop").on("click", function(e) {
+        e.preventDefault();
+        Play.stop();
+      });
+    });
+  }
 
+}
 
+PlayList.init() ;
 Sync.init();
 

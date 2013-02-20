@@ -1,4 +1,4 @@
-a#play, a#pause, a#skew, a#error {
+a, div{
   margin:10px ;
   font-size: 48px;
   text-decoration: none;
@@ -6,6 +6,5 @@ a#play, a#pause, a#skew, a#error {
 }
 
 a.disabled {
-  margin:10px ;
   color: #ddd;
 }
