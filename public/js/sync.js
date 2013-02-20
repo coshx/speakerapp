@@ -58,7 +58,7 @@ var Sync = {
 
       if (error < Sync.maxAllowedError) {
         $("#play").removeClass("disabled");
-        $("#play").text("Play");
+        $("#play").text("Subscribe");
       }else{
         Sync.maxGuesses = Sync.maxGuesses + Sync.maxGuesses/10 ;
         Sync.getSkew(Sync.maxGuesses);
@@ -69,13 +69,31 @@ var Sync = {
   }
 };
 
-
 var Play = {
-  src: "media/rainbow.mp3",
-  duration: 222000, // hardcode since seeing 300ms diff btw browsers
+  title: "",
+  src: null,
+  start_at: null,
+  duration: 0,
   audio: null,
 
+  fetchSrcData: function(){
+    console.log('fetchSrcData') ;
+    $.get("/song_info", Play.handleFetchSrcResponse);
+  },
+  handleFetchSrcResponse: function(serverResponse){
+    console.log('handleFetchSrcResponse')
+    Play.title = serverResponse.title  ;
+    Play.src = serverResponse.url  ;
+    Play.start_at = serverResponse.start_at  ;
+    Play.duration = serverResponse.duration  ;
+    Play.play() ;
+  },
   play: function() {
+
+    if(Play.src==null){
+      Play.src = Play.fetchSrcData() ;
+      return ;
+    }
     $("#play").text("Loading...");
 
     if (Play.audio == null) {
@@ -93,13 +111,13 @@ var Play = {
       return;
     }
 
-    $("#play").text("Playing...");
+    $("#play").text("Playing "+Play.title);
     $("#pause").text("Pause");
 
-    var currentServerTime;
+    var currentServerTime ;
     currentServerTime = new Date().getTime() + Sync.skew;
-    var currentSongTime;
-    currentSongTime = (currentServerTime % Play.duration) / 1000;
+    var currentSongTime ;
+    currentSongTime = ((currentServerTime - Play.start_at) % Play.duration)/1000 ;                                            //(currentServerTime % Play.duration) ;
 
     Play.audio.play();
 

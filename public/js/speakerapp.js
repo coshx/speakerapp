@@ -11,8 +11,8 @@ speakerApp = {
     app.audio.volume = 0;
     app.audio.src = "media/rainbow.mp3";
     app.syncInterval = 2000;
-    app.milliseconds_in_a_year = 1000*60*60 ;
-    app.id = (new Date().getTime() % app.milliseconds_in_a_year)
+    app.milliseconds_in_an_hour = 1000*60*60 ;
+    app.id = (new Date().getTime() % app.milliseconds_in_an_hour)
 
     $('#play').on('click', function(e) {
       var app = speakerApp;
@@ -37,7 +37,7 @@ speakerApp = {
     $.ajax({ url:  "/time", dataType: 'json', async: false, success: function(data) {
       app.server_time_response = data["time"] ;
     }});
-    app.audio.currentTime  = ((app.server_time_response % app.milliseconds_in_a_year) % app.song_duration) * 0.001 ;
+    app.audio.currentTime  = ((app.server_time_response % app.milliseconds_in_an_hour) % app.song_duration) * 0.001 ;
     app.audio.volume = 1 ;
     app.time = new Date().getTime() ;
     app.skew = app.time - app.server_time_response ;
