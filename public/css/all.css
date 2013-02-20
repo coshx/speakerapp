@@ -1,4 +1,4 @@
-a#play, a#sync {
+a#play, a#pause, a#skew, a#error {
   margin:10px ;
   font-size: 48px;
   text-decoration: none;

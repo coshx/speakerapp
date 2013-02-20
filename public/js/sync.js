@@ -1,11 +1,18 @@
 var Sync = {
   guesses: 0,
   skew: 0,
-  maxGuesses: 0,
+  maxGuesses: 10,
   lastGuessTime: 0,
   skewError: 0,
   maxAllowedError: 15,
+  preferredError: 5,
 
+  init: function() {
+    var app = this;
+    $(function() {
+        Sync.getSkew(Sync.maxGuesses);
+    });
+  },
   getSkew: function(maxGuesses) {
     var currentTime, initialRequestTime;
     currentTime = Sync.lastGuessTime = new Date().getTime();
@@ -21,7 +28,16 @@ var Sync = {
   makeGuess: function(currentGuess) {
     $.get("/guess", currentGuess, Sync.handleGuessResponse);
   },
-
+  errorContext:function(error){
+    var context = ""  ;
+    if(error<=Sync.preferredError)
+      context = "(Excellent)"  ;
+    else if(error<=Sync.maxAllowedError)
+      context = "(Good)"  ;
+    else
+      context = "(bad)" ;
+    return context ;
+  },
   handleGuessResponse: function(serverResponse) {
     var currentTime, totRequestTime, guess;
     currentTime = new Date().getTime();
@@ -34,10 +50,18 @@ var Sync = {
     Sync.guesses++;
 
     if (Sync.guesses >= Sync.maxGuesses) {
-      $("#skew").text("Skew: " + Sync.skew + ", Error: ±" + Sync.skewError);
-      console.log("Est. Server Time: " + (new Date().getTime() + Sync.skew));
-      if (Math.abs(Sync.skewError) < Sync.maxAllowedError) {
+
+      var error = Math.abs(Sync.skewError) ;
+      var context = Sync.errorContext(error) ;
+      $("#skew").text("Skew: " + Sync.skew) ;
+      $("#error").text("Error: ±" + Sync.skewError+" "+context);
+
+      if (error < Sync.maxAllowedError) {
         $("#play").removeClass("disabled");
+        $("#play").text("Play");
+      }else{
+        Sync.maxGuesses = Sync.maxGuesses + Sync.maxGuesses/10 ;
+        Sync.getSkew(Sync.maxGuesses);
       }
     } else {
       Sync.makeGuess(guess);
@@ -93,10 +117,6 @@ var Play = {
 };
 
 $(function() {
-  $("#calculateSkew").on("click", function(e) {
-    Sync.getSkew($("#maxGuesses").val());
-    e.preventDefault();
-  });
 
   $("#play").on("click", function(e) {
     e.preventDefault();
@@ -117,3 +137,7 @@ $(function() {
     $("#play").removeClass("disabled");
   });
 });
+
+
+Sync.init();
+
