@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Speaker App Proof of Concept</title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="../js/jquery.flot.js"></script>
+    <script type="text/javascript" src="../js/jstat-1.0.0.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+
+    <script type="text/javascript" src="../js/graph.js"></script>
+ 
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.1/themes/base/jquery-ui.css" type="text/css" media="all"/>
+    <link rel="stylesheet" href="../css/all.css" type="text/css" media="all"/>
+  </head>
+  <body>
+    <h1><a href="#" data-plot="serverTimes">Server Times</a></h1>
+    <h1><a href="#" data-plot="roundtripTimes">Roundtrip Times</a></h1>
+    <h1><a href="#" data-plot="diffTimesReq">Server - Client (request) Times</a></h1>
+    <h1><a href="#" data-plot="diffTimesResp">Client (response) - Server Times</a></h1>
+    <h1><a href="#" data-plot="dServerTime">d(Server Time)/dt</a></h1>
+    <h1><a href="#" data-plot="dClientTime">d(Client Time)/dt</a></h1>
+    <h1><a href="#" data-plot="dSkew">dSkew/dt</a></h1>
+    <h1><a href="#" data-plot="skew">Skew</a></h1>
+    <div id="skew"></div>
+  </body>
+</html>

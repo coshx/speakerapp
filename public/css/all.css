@@ -1,11 +1,11 @@
 a#play, a#sync {
-    margin:10px ;
+  margin:10px ;
   font-size: 48px;
   text-decoration: none;
   color: #22f;
 }
 
-a#play.disabled, a#sync.disabled {
+a.disabled {
   margin:10px ;
   color: #ddd;
 }
