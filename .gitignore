@@ -6,6 +6,8 @@
 
 .DS_Store
 
+public/js/trash/
+
 # Ignore bundler config
 /.bundle
 

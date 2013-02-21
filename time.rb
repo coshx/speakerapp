@@ -29,7 +29,7 @@ class Song
 end
 
 get "/" do
-  redirect '/index.html'
+  redirect '/speakerapp.html'
 end
 
 get '/time' do
