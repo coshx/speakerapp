@@ -10,10 +10,10 @@ var Graph = {
     Graph.clientRequestTimes = [];
     Graph.clientResponseTimes = [];
     Graph.roundtripTimes = [];
-    Graph.getServerTimes(callback);
+    Graph.getServerTime(callback);
   },
 
-  getServerTimes: function(callback) {
+  getServerTime: function(callback) {
     Graph.clientRequestTimes.push(new Date().getTime());
 
     $.get("/time", function(data) {
@@ -26,7 +26,7 @@ var Graph = {
       Graph.roundtripTimes.push(roundtripTime);
 
       if (Graph.serverTimes.length < Graph.maxRequests) {
-        Graph.getServerTimes(callback);
+        Graph.getServerTime(callback);
       } else {
         callback();
       }
