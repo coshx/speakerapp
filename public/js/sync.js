@@ -10,39 +10,39 @@ var Sync = {
   init: function() {
     var app = this;
     $(function() {
-        Sync.getSkew(Sync.maxGuesses);
-    });
+        Sync.getSkew(Sync.maxGuesses) ;
+    }) ;
   },
   getSkew: function(maxGuesses) {
     var currentTime, initialRequestTime;
-    currentTime = Sync.lastGuessTime = new Date().getTime();
+    currentTime = Sync.lastGuessTime = new Date().getTime() ;
     Sync.maxGuesses = maxGuesses;
     Sync.guesses = 0;
     Sync.skew = 0;
 
     // uniform distribution, avg. 100, ±25
     initialRequestTime = 100+Math.random()*50-25;
-    Sync.makeGuess({client: currentTime, requestTime: initialRequestTime});
+    Sync.makeGuess({client: currentTime, requestTime: initialRequestTime}) ;
   },
 
   makeGuess: function(currentGuess) {
-    $.get("/guess", currentGuess, Sync.handleGuessResponse);
+    $.get("/guess", currentGuess, Sync.handleGuessResponse) ;
   },
-  errorContext:function(error){
-    var context = ""  ;
+  errorContext:function(error) {
+    var context = "";
     if(error<=Sync.preferredError)
-      context = "(Excellent)"  ;
+      context = "(Excellent)";
     else if(error<=Sync.maxAllowedError)
-      context = "(Good)"  ;
+      context = "(Good)";
     else
-      context = "(bad)" ;
+      context = "(bad)";
     return context ;
   },
   handleGuessResponse: function(serverResponse) {
     var currentTime, totRequestTime, guess;
-    currentTime = new Date().getTime();
+    currentTime = new Date().getTime() ;
     totRequestTime = currentTime - Sync.lastGuessTime;
-    Sync.skew = Sync.skew + (0.63*serverResponse.skew);
+    Sync.skew = Sync.skew + (0.63*serverResponse.skew) ;
     Sync.skewError = serverResponse.skew;
 
     Sync.lastGuessTime = currentTime;
@@ -54,17 +54,17 @@ var Sync = {
       var error = Math.abs(Sync.skewError) ;
       var context = Sync.errorContext(error) ;
       $("#skew").text("Skew: " + Sync.skew) ;
-      $("#error").text("Error: ±" + Sync.skewError+" "+context);
+      $("#error").text("Error: ±" + Sync.skewError+" "+context) ;
 
       if (error < Sync.maxAllowedError) {
-        $("#play").removeClass("disabled");
-        $("#play").text("Subscribe");
+        $("#play").removeClass("disabled") ;
+        $("#play").text("Subscribe") ;
       }else{
-        Sync.maxGuesses = Sync.maxGuesses + Sync.maxGuesses/10 ;
-        Sync.getSkew(Sync.maxGuesses);
+        Sync.maxGuesses = Sync.maxGuesses + Sync.maxGuesses/10;
+        Sync.getSkew(Sync.maxGuesses) ;
       }
     } else {
-      Sync.makeGuess(guess);
+      Sync.makeGuess(guess) ;
     }
   }
 };
@@ -75,57 +75,67 @@ var Play = {
   start_at: null,
   duration: 0,
   audio: null,
+  count:0,
 
-  fetchAudioData: function(){
-    $.get("/song_info", function(serverResponse){
-      Play.title = serverResponse.title  ;
-      Play.url = serverResponse.url  ;
-      Play.start_at = serverResponse.start_at  ;
-      Play.duration = serverResponse.duration  ;
-      if(Play.url=="") console.log("no feed...");
-      else Play.play() ;
-    });
+  fetchAudioData: function() {
+    $.get("/song_info", function(serverResponse) {
+      Play.title = serverResponse.title;
+      Play.url = serverResponse.url;
+      Play.start_at = serverResponse.start_at;
+      Play.duration = serverResponse.duration;
+      if(Play.url=="")
+        console.log("no feed...") ;
+    }) ;
   },
   play: function() {
-    $("#play").text("Loading...");
+    $("#play").text("Loading...") ;
+
+    if(Play.url==null) {
+     Play.fetchAudioData() ;
+     setTimeout(Play.play, 500) ;
+     return ;
+    }
 
     if (Play.audio == null) {
-      if(Play.url==null){
-        Play.url = Play.fetchAudioData() ;
-        return ;
-      }else{
-        Play.audio = new Audio();
-        Play.audio.src = Play.url;
-        Play.audio.play();
-        setTimeout(function() {}, 1);
-      }
+      Play.audio = new Audio() ;
+      Play.audio.src = Play.url;
+      Play.audio.play() ;
+      setTimeout(function() {
+      }, 1) ;
     }
     if (Play.audio.readyState !== 4) { // HAVE_ENOUGH_DATA
-      console.log("waiting for enough data...");
-      setTimeout(Play.play, 500);
+      console.log("waiting for enough data...") ;
+      $("#play").text("Loading... ") ;
+      setTimeout(Play.play, 500) ;
       return;
     }
-    $("#play").text("Playing "+Play.title);
-    $("#stop").text("Stop");
-    $("#stop").removeClass("disabled");
+    $("#play").text("Playing "+Play.title) ;
+    $("#pause").text("Stop") ;
+    $("#pause").removeClass("disabled") ;
 
-    var currentServerTime ;
+    var currentServerTime;
+    var currentSongTime;
+
     currentServerTime = new Date().getTime() + Sync.skew;
-    var currentSongTime ;
-    currentSongTime = ((currentServerTime - Play.start_at) % Play.duration)/1000 ;
+    currentSongTime = ((currentServerTime - Play.start_at) % Play.duration)/1000;
+    Play.audio.currentTime = currentSongTime ;
 
-    Play.audio.currentTime = currentSongTime;
-
-    console.log("Current server time is: " + currentServerTime);
-    console.log("Setting currentTime to " + currentSongTime);
-   },
-  stop: function() {
+    player_lag = Math.abs(currentSongTime - Play.audio.currentTime) ;
+    Play.count++ ;
+    if(Play.count<5 && player_lag>0) {
+       setTimeout(Play.play,1000) ;
+    }
+    console.log("Player lag: "+(currentSongTime - Play.audio.currentTime)) ;
+    console.log("Current server time is: " + currentServerTime) ;
+    console.log("Setting currentTime to " + currentSongTime) ;
+  },
+  pause: function() {
     if (Play.audio != null) {
-      $("#stop").text("");
+      $("#pause").text("") ;
       $("#play").text("Subscribe")
-      $("#play").removeClass("disabled");
-      Play.audio.pause();
-      Play.url = null  ;
+      $("#play").removeClass("disabled") ;
+      Play.audio.pause() ;
+      Play.url = null;
       Play.audio = null;
     }
   }
@@ -139,37 +149,37 @@ PlayList = {
   init: function() {
     $(function() {
       $.each(PlayList.songs, function(index, song) {
-        $("#song_list option[id='"+index+"']").text(PlayList.songs[index].title);
-        $("#song_list option[id='"+index+"']").val(index);
-      });
+        $("#song_list option[id='"+index+"']").text(PlayList.songs[index].title) ;
+        $("#song_list option[id='"+index+"']").val(index) ;
+      }) ;
 
       $("#song_list").on("change", function(e) {
-        e.preventDefault();
+        e.preventDefault() ;
         var selected_index = $('#song_list :selected').val() ;
-        $.post('/song_info', PlayList.songs[selected_index]);
-        Play.stop() ;
+        $.post('/song_info', PlayList.songs[selected_index]) ;
+        Play.pause() ;
         $("#play").text("Broadcast") ;
-      });
+      }) ;
 
       $("#play").on("click", function(e) {
-        e.preventDefault();
+        e.preventDefault() ;
         if ($("#play").hasClass("disabled")) {
         return;
         }
-        Play.play();
-        $("#play").addClass("disabled");
-        $("#play").text("loading...");
-      });
+        Play.play() ;
+        $("#play").addClass("disabled") ;
+        $("#play").text("loading...") ;
+      }) ;
 
-      $("#stop").on("click", function(e) {
-        e.preventDefault();
-        Play.stop();
-      });
-    });
+      $("#pause").on("click", function(e) {
+        e.preventDefault() ;
+        Play.pause() ;
+      }) ;
+    }) ;
   }
 
 }
 
 PlayList.init() ;
-Sync.init();
+Sync.init() ;
 
