@@ -19,7 +19,7 @@ var GuessSync = {
     GuessSync.makeGuess({client: currentTime, requestTime: initialRequestTime});
   },
   makeGuess: function(currentGuess) {
-   $.ajax({ url:  "/guess", data: currentGuess, dataType: 'json', async: false, success: function(serverResponse) {
+   $.ajax({ url:  "/guess", cache: false, data: currentGuess, dataType: 'json', async: false, success: function(serverResponse) {
     var currentTime, totRequestTime, guess;
     currentTime = new Date().getTime();
     totRequestTime = currentTime - GuessSync.lastGuessTime;

@@ -10,7 +10,7 @@ var NtpSync = {
   },
   getServerTime: function() {
     NtpSync.clientRequestTimes.push(new Date().getTime());
-    $.ajax({ url:  "/time", dataType: 'json', async: false, success: function(data) {
+    $.ajax({ url:  "/time",cache: false,  dataType: 'json', async: false, success: function(data) {
       var currentTime = new Date().getTime();
       NtpSync.serverTimes.push(data.time);
       NtpSync.clientResponseTimes.push(currentTime);
