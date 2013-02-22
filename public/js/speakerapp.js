@@ -5,6 +5,7 @@ var Play = {
   duration: 0,
   audio: null,
   count:0,
+  playing:false,
 
   fetchAudioData: function() {
     $.ajax({ url:  "/song_info", cache: false, dataType: 'json', async: false, success: function(serverResponse) {
@@ -12,12 +13,11 @@ var Play = {
       Play.url = serverResponse.url;
       Play.start_at = serverResponse.start_at;
       console.log(Play.start_at);
-      if(Play.url=="")
-        console.log("no feed...");
     }});
   },
   play: function() {
-    if(Play.url==null) {
+
+    if(Play.url==null || Play.url=="") {
       Play.fetchAudioData();
       setTimeout(Play.play, 500);
       return false;
@@ -32,7 +32,7 @@ var Play = {
 
     if (Play.audio.readyState != 4) { // HAVE_ENOUGH_DATA
       Play.audio.play();
-      $("#play").text("Loading... ");
+      $("#status").text("Loading... ");
       setTimeout(Play.play, 500);
       return false;
     }
@@ -40,13 +40,14 @@ var Play = {
     Play.currentServerTime = new Date().getTime() + Sync.clock_skew;
     Play.audio.currentTime = ((Play.currentServerTime - Play.start_at)*0.001);
 
-    $("#play").text("Playing "+Play.title);
-    $("#pause").text("Pause");
-    $("#pause").removeClass("disabled");
-
     Play.count++;
     if(Play.count<5) {
-      setTimeout(Play.play,1000);
+      $("#status").text("Syncing ...");
+      setTimeout(Play.play,500);
+    }else{
+      $("#status").text("Playing");
+      $("#pause").text("Pause");
+      $("#pause").removeClass("disabled");
     }
     //console.log("Player lag: "+(currentSongTime - Play.audio.currentTime));
     //console.log("Current server time is: " + currentServerTime);
@@ -55,7 +56,6 @@ var Play = {
   pause: function() {
     if (Play.audio != null) {
       $("#pause").text("");
-      $("#play").text("Subscribe")
       $("#play").removeClass("disabled");
       Play.audio.pause();
       Play.url = null;
@@ -82,10 +82,19 @@ PlayList = {
   init: function() {
     $(function() {
 
-      $("#skew").text("Skew: " + Sync.clock_skew);
+      Play.fetchAudioData();
+      if(Play.title!=""){
+        $("#play").text("Subscribe - "+Play.title);
+        $("#play").removeClass("disabled");
+      }else{
+        $("#play").text("Subscribe");
+        $("#play").addClass("disabled") ;
+      }
 
-      $("#play").removeClass("disabled");
-      $("#play").text("Subscribe");
+      $("#status").text("Ready");
+      $("#skew").text("Skew: " + Sync.clock_skew);
+      $("#broadcast").addClass("disabled");
+      $("#pause").addClass("disabled");
 
       $.each(PlayList.songs, function(index, song) {
         $("#song_list option[id='"+index+"']").text(PlayList.songs[index].title);
@@ -93,25 +102,40 @@ PlayList = {
       });
 
       $("#song_list").on("change", function(e) {
-        e.preventDefault();
-        var selected_index = $('#song_list :selected').val();
-        $.post('/song_info', PlayList.songs[selected_index]);
+        $("#broadcast").removeClass("disabled");
         Play.pause();
-        $("#play").text("Broadcast");
+        e.preventDefault();
       });
 
-      $("#play").on("click", function(e) {
+      $("#broadcast").on("click", function(e) {
+        $("#broadcast").addClass("disabled");
+        var selected_index = $('#song_list :selected').val();
+        $("#status").text("starting broadcast...");
+        $.post('/song_info', PlayList.songs[selected_index], function(data){
+          $("#status").text("Ready");
+          $("#play").text("Subscribe - "+PlayList.songs[selected_index].title);
+          $("#play").removeClass("disabled");
+        });
         e.preventDefault();
+      });
+      $("#play").on("click", function(e) {
+
         if ($("#play").hasClass("disabled")) {
           return;
         }
+
+        $("#broadcast").addClass("disabled");
+        $("#status").text("Connecting...");
         Play.play();
         $("#play").addClass("disabled");
+          e.preventDefault();
+
       });
 
       $("#pause").on("click", function(e) {
-        e.preventDefault();
+        $("#status").text("Ready");
         Play.pause();
+        e.preventDefault();
       });
     });
   }

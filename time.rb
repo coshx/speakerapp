@@ -42,7 +42,9 @@ get '/time' do
 end
 
 post '/song_info' do
-   Song.update({:title=>params[:title],:url=>params[:url]})
+   Song.update({:title=>params[:title],:url=>params[:url]})   #why is @start_time changing?
+   content_type :json
+   {}.to_json
 end
 
 get '/song_info' do
