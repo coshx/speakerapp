@@ -57,9 +57,9 @@ var Play = {
     if (Play.audio != null) {
       $("#pause").text("");
       $("#play").removeClass("disabled");
-      Play.audio.pause();
-      Play.url = null;
-      Play.audio = null;
+        Play.audio.src =""     //assign a blank string as audio src
+        Play.audio.load() ;    //play src to induce audio player to delete the prior mp3 from memory
+        Play.audio = null ;
     }
   }
 };
