@@ -5,23 +5,17 @@ require 'json'
 class Song
 
   @title = ""
-  @duration = 0
   @url =""
   @start_time = 0
 
   def self.update(options={})
     @title = options[:title]
-    @duration = options[:duration]
     @url = options[:url]
     @start_time = (Time.now.utc.to_f * 1000.0).to_i
   end
 
   def self.title()
     @title
-  end
-
-  def self.duration()
-    @duration
   end
 
   def self.url()
@@ -48,12 +42,12 @@ get '/time' do
 end
 
 post '/song_info' do
-   Song.update({:title=>params[:title],:url=>params[:url],:duration=>params[:duration] })
+   Song.update({:title=>params[:title],:url=>params[:url]})
 end
 
 get '/song_info' do
   content_type :json
-  {title: Song.title(), url: Song.url(), start_at: Song.start(), duration: Song.duration()}.to_json
+  {title: Song.title(), url: Song.url(), start_at: Song.start()}.to_json
 end
 
 post '/post_start_time' do
