@@ -26,12 +26,14 @@ var Play = {
     }
 
     if (Play.audio == null) {
+        Play.count = 0 ;
       Play.audio = new Audio();
       Play.audio.src = Play.url;
+      Play.audio.loop = false ;
       Play.audio.play();
     }
 
-    if (Play.audio.readyState !== 4) { // HAVE_ENOUGH_DATA
+    if (Play.audio.readyState !== 4 && Play.count==0) { // HAVE_ENOUGH_DATA
       console.log("waiting for enough data...");
       $("#play").text("Loading... ");
       setTimeout(Play.play, 500);
@@ -45,16 +47,15 @@ var Play = {
     var currentSongTime;
 
     currentServerTime = new Date().getTime() + Sync.clock_skew;
-    currentSongTime = ((currentServerTime - Play.start_at) % Play.duration)/1000;
+    currentSongTime = ((currentServerTime - Play.start_at)/1000);
     Play.audio.currentTime = currentSongTime;
 
-    player_lag = Math.abs(currentSongTime - Play.audio.currentTime);
     Play.count++;
-    if(Play.count<5 && player_lag>0) {
+    if(Play.count<5) {
       setTimeout(Play.play,1000);
-
     }
     console.log("Player lag: "+(currentSongTime - Play.audio.currentTime));
+
     //console.log("Current server time is: " + currentServerTime);
     //console.log("Setting currentTime to " + currentSongTime);
   },
@@ -72,8 +73,9 @@ var Play = {
 
 PlayList = {
   songs: [
-   {title:"Rainbow",url: "http://speakerapp.herokuapp.com/media/rainbow.mp3", duration:222000},
-   {title:"Thirdday",url: "http://speakerapp.herokuapp.com/media/thirdday.mp3", duration:210000}
+   {title:"Rainbow", url: "http://speakerapp.herokuapp.com/media/rainbow.mp3", duration:222000},
+   {title:"Thirdday", url: "http://speakerapp.herokuapp.com/media/thirdday.mp3", duration:215000},
+   {title:"Cross", url: "http://speakerapp.herokuapp.com/media/cross.mp3", duration:215000}
   ],
   init: function() {
     $(function() {
@@ -99,7 +101,7 @@ PlayList = {
       $("#play").on("click", function(e) {
         e.preventDefault();
         if ($("#play").hasClass("disabled")) {
-        return;
+          return;
         }
         Play.play();
         $("#play").addClass("disabled");

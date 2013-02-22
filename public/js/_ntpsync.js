@@ -1,5 +1,5 @@
 var NtpSync = {
-  maxRequests: 25,
+  maxRequests: 100,
   serverTimes: [],
   clientRequestTimes: [],
   clientResponseTimes: [],

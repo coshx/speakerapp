@@ -7,11 +7,13 @@ class Song
   @title = ""
   @duration = 0
   @url =""
+  @start_time = 0
 
   def self.update(options={})
     @title = options[:title]
     @duration = options[:duration]
     @url = options[:url]
+    @start_time = (Time.now.utc.to_f * 1000.0).to_i
   end
 
   def self.title()
@@ -24,6 +26,10 @@ class Song
 
   def self.url()
     @url
+  end
+
+  def self.start()
+    @start_time
   end
 
 end
@@ -46,11 +52,8 @@ post '/song_info' do
 end
 
 get '/song_info' do
-  milliseconds_in_a_minute = 60*1000
-  now = (Time.now.utc.to_f * 1000.0).to_i
-  song_start = now - (now %  milliseconds_in_a_minute) ; #song starts every minute on the minute
   content_type :json
-  {title: Song.title(), url: Song.url(), start_at: song_start, duration: Song.duration()}.to_json
+  {title: Song.title(), url: Song.url(), start_at: Song.start(), duration: Song.duration()}.to_json
 end
 
 post '/post_start_time' do
