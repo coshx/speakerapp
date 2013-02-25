@@ -3,7 +3,7 @@ var NtpSync = {
   serverTimes: [],
   clientRequestTimes: [],
   clientResponseTimes: [],
-  clock_skew: 0,
+  clockSkew: 0,
 
   init: function() {
     NtpSync.getServerTime();
@@ -37,7 +37,7 @@ var NtpSync = {
 
     var avgReqPlusSkew = sumReqPlusSkew / NtpSync.serverTimes.length;
     var avgRespMinusSkew = sumRespMinusSkew / NtpSync.serverTimes.length;
-    NtpSync.clock_skew = avgReqPlusSkew - ((avgReqPlusSkew+avgRespMinusSkew)/2);
+    NtpSync.clockSkew = avgReqPlusSkew - ((avgReqPlusSkew+avgRespMinusSkew)/2);
   }
 
 };

@@ -49,7 +49,7 @@ end
 
 get '/song_info' do
   content_type :json
-  {title: Song.title(), url: Song.url(), start_at: Song.start()}.to_json
+  {title: Song.title(), url: Song.url(), serverStartTime: Song.start()}.to_json
 end
 
 post '/post_start_time' do

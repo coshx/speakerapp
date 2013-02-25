@@ -1,67 +1,82 @@
 var Play = {
-  title: null,
-  url: null,
-  start_at: null,
-  duration: 0,
-  audio: null,
+  title:null,
+  url:null,
+  serverStartTime:null,
+  duration:0,
+  audio:null,
   count:0,
   playing:false,
+  playerLag: 0,
 
-  fetchAudioData: function() {
-    $.ajax({ url:  "/song_info", cache: false, dataType: 'json', async: false, success: function(serverResponse) {
+  fetchAudioData:function (){
+    Play.title = ""
+    Play.url = null ;
+    Play.serverStartTime = null ;
+    $.ajax({ url:"/song_info", cache:false, dataType:'json', async:false, success:function (serverResponse){
       Play.title = serverResponse.title;
       Play.url = serverResponse.url;
-      Play.start_at = serverResponse.start_at;
-      console.log(Play.start_at);
+      Play.serverStartTime = serverResponse.serverStartTime;
     }});
   },
-  play: function() {
-
-    if(Play.url==null || Play.url=="") {
+  play:function (){
+    if (Play.url == null){
       Play.fetchAudioData();
-      setTimeout(Play.play, 500);
+      Play.audio = null;
+      Play.count = 0;
+      setTimeout(Play.play, 1000);
       return false;
     }
-
-    if (Play.audio == null) {
-      Play.count = 0 ;
+    if (Play.audio == null){
       Play.audio = new Audio();
       Play.audio.src = Play.url;
-      Play.audio.loop = false ;
-    }
-
-    if (Play.audio.readyState != 4) { // HAVE_ENOUGH_DATA
       Play.audio.play();
+      Play.playing = true;
+    }
+    if (Play.audio.readyState != 4){
       $("#status").text("Loading... ");
-      setTimeout(Play.play, 500);
-      return false;
-    }
-
-    Play.currentServerTime = new Date().getTime() + Sync.clock_skew;
-    Play.audio.currentTime = ((Play.currentServerTime - Play.start_at)*0.001);
-
-    Play.count++;
-    if(Play.count<5) {
-      $("#status").text("Syncing ...");
-      setTimeout(Play.play,500);
-    }else{
-      $("#status").text("Playing");
-      $("#pause").text("Pause");
+        setTimeout(Play.play, 500);
+        return false;
+      }
+      Play.sync();
+    },
+    sync:function (){
+      Play.clientStartTime = Date.now();
+      Play.audio.currentTime = (Play.clientStartTime + Sync.clockSkew - Play.serverStartTime) * 0.001 ;
+      Play.count++;
+      if (Play.count < 5 && Play.playing){
+        $("#status").text("Syncing ...");
+        setTimeout(Play.sync, 500);
+      } else {
+        Play.fineTunePlayerLag();
+      }
+    },
+    fineTunePlayerLag: function(){
+      var timeElasped = Date.now() -  Play.clientStartTime ;
+      var currentTimeShouldBe = 0.001*(timeElasped + Play.clientStartTime + Sync.clockSkew - Play.serverStartTime);
+      var actualTime = Play.audio.currentTime;
+      var difference = currentTimeShouldBe - actualTime  ;
+      Play.playerLag += difference
+      Play.audio.currentTime = currentTimeShouldBe + Play.playerLag/4 ;
+      if(Math.abs(difference)*1000>0.1){
+        setTimeout(Play.fineTunePlayerLag, 100);
+        return false ;
+      }
       $("#pause").removeClass("disabled");
+      $("#song_list").removeClass("disabled");
+      $("#status").text("Playing");
+    },
+    pause:function (){
+      if (Play.playing){
+        Play.playing = false;
+        $("#pause").addClass("disabled");
+        $("#status").text("Ready");
+        $("#play").removeClass("disabled");
+        Play.url = null;
+        Play.audio.pause();
+        Play.audio.src = ""
+        Play.audio = null;
+      }
     }
-    //console.log("Player lag: "+(currentSongTime - Play.audio.currentTime));
-    //console.log("Current server time is: " + currentServerTime);
-    //console.log("Setting currentTime to " + currentSongTime);
-  },
-  pause: function() {
-    if (Play.audio != null) {
-      $("#pause").text("");
-      $("#play").removeClass("disabled");
-        Play.audio.src =""     //assign a blank string as audio src
-        Play.audio.load() ;    //play src to induce audio player to delete the prior mp3 from memory
-        Play.audio = null ;
-    }
-  }
 };
 
 PlayList = {
@@ -76,38 +91,32 @@ PlayList = {
    {title:"Lay Your Head", url: "https://s3.amazonaws.com/gigdog.fm/songs/New_Day_Dawn/ev8r0csc9ez0yrqa_-_Lay_Your_Head_-_ev8r0csc9ez0yrqa.mp3"},
    {title:"The Call (Album Version)", url: "https://s3.amazonaws.com/gigdog.fm/songs/The_Hill_and_Wood/tsmdac9qxf059leo_-_The_Call__Album_Version__-_tsmdac9qxf059leo.mp3"},
    {title:"Rainbow", url: "http://speakerapp.herokuapp.com/media/rainbow.mp3"},
-   {title:"Thirdday", url: "http://speakerapp.herokuapp.com/media/thirdday.mp3"},
    {title:"Cross", url: "http://speakerapp.herokuapp.com/media/cross.mp3"}
   ],
-  init: function() {
-    $(function() {
-
+  init: function(){
+    $(function(){
       Play.fetchAudioData();
+      Play.url = null ;
       if(Play.title!=""){
         $("#play").text("Subscribe - "+Play.title);
         $("#play").removeClass("disabled");
       }else{
         $("#play").text("Subscribe");
-        $("#play").addClass("disabled") ;
       }
-
       $("#status").text("Ready");
-      $("#skew").text("Skew: " + Sync.clock_skew);
+      $("#skew").text("Skew: " + Sync.clockSkew);
       $("#broadcast").addClass("disabled");
       $("#pause").addClass("disabled");
-
-      $.each(PlayList.songs, function(index, song) {
+      $.each(PlayList.songs, function(index, song){
         $("#song_list option[id='"+index+"']").text(PlayList.songs[index].title);
         $("#song_list option[id='"+index+"']").val(index);
       });
-
-      $("#song_list").on("change", function(e) {
+      $("#song_list").on("change", function(e){
         $("#broadcast").removeClass("disabled");
         Play.pause();
         e.preventDefault();
       });
-
-      $("#broadcast").on("click", function(e) {
+     $("#broadcast").on("click", function(e){
         $("#broadcast").addClass("disabled");
         var selected_index = $('#song_list :selected').val();
         $("#status").text("starting broadcast...");
@@ -118,39 +127,30 @@ PlayList = {
         });
         e.preventDefault();
       });
-      $("#play").on("click", function(e) {
-
-        if ($("#play").hasClass("disabled")) {
-          return;
+      $("#play").on("click", function(e){
+        if ($("#play").hasClass("disabled")){
+          return false;
         }
-
         $("#broadcast").addClass("disabled");
         $("#status").text("Connecting...");
-        Play.play();
         $("#play").addClass("disabled");
-          e.preventDefault();
-
+        Play.play();
+        e.preventDefault();
       });
-
-      $("#pause").on("click", function(e) {
+      $("#pause").on("click", function(e){
         $("#status").text("Ready");
         Play.pause();
         e.preventDefault();
       });
     });
   }
-
 }
 
 var Sync ={
-  clock_skew: 0,
-
-  init: function() {
-    //GuessSync.init();
-    //console.log("GuessSync.clock_skew "+GuessSync.clock_skew);
+  clockSkew: 0,
+  init: function(){
     NtpSync.init();
-    console.log("NtpSync.clock_skew "+NtpSync.clock_skew);
-    this.clock_skew = NtpSync.clock_skew;
+    this.clockSkew = NtpSync.clockSkew;
   }
 }
 

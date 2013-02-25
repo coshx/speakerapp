@@ -5,7 +5,7 @@ var GuessSync = {
   lastGuessTime: 0,
   skewError: 0,
   maxAllowedError:10,
-  clock_skew: 0,
+  clockSkew: 0,
 
   init: function() {
     GuessSync.getSkew(GuessSync.maxGuesses);
