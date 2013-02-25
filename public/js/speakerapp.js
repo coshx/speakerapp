@@ -57,7 +57,7 @@ var Play = {
       var difference = currentTimeShouldBe - actualTime  ;
       Play.playerLag += difference
       Play.audio.currentTime = currentTimeShouldBe + Play.playerLag/4 ;
-      if(Math.abs(difference)*1000>2){
+      if(Math.abs(difference)*1000>.5){
         setTimeout(Play.fineTunePlayerLag, 500);
         return false ;
       }
@@ -98,7 +98,7 @@ PlayList = {
       Play.fetchAudioData();
       Play.url = null ;
       if(Play.title!=""){
-        $("#play").text("Subscribe - "+Play.title);
+        $("#play").text("Subscribe");
         $("#play").removeClass("disabled");
       }else{
         $("#play").text("Subscribe");
@@ -150,7 +150,9 @@ var Sync ={
   clockSkew: 0,
   init: function(){
     NtpSync.init();
-    this.clockSkew = NtpSync.clockSkew;
+    GateSync.init();
+    this.clockSkew = GateSync.clockSkew;
+    console.log("NtpSync: "+NtpSync.clockSkew+", GateSync: "+GateSync.clockSkew);
   }
 }
 

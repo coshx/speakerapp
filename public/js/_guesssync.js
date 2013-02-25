@@ -7,10 +7,10 @@ var GuessSync = {
   maxAllowedError:10,
   clockSkew: 0,
 
-  init: function() {
+  init: function(){
     GuessSync.getSkew(GuessSync.maxGuesses);
   },
-  getSkew: function(maxGuesses) {
+  getSkew: function(maxGuesses){
     var currentTime, initialRequestTime;
     currentTime = GuessSync.lastGuessTime = new Date().getTime();
 
@@ -18,8 +18,8 @@ var GuessSync = {
     initialRequestTime = 100+Math.random()*50-25;
     GuessSync.makeGuess({client: currentTime, requestTime: initialRequestTime});
   },
-  makeGuess: function(currentGuess) {
-   $.ajax({ url:  "/guess", cache: false, data: currentGuess, dataType: 'json', async: false, success: function(serverResponse) {
+  makeGuess: function(currentGuess){
+   $.ajax({ url:  "/guess", cache: false, data: currentGuess, dataType: 'json', async: false, success: function(serverResponse){
     var currentTime, totRequestTime, guess;
     currentTime = new Date().getTime();
     totRequestTime = currentTime - GuessSync.lastGuessTime;
@@ -30,10 +30,10 @@ var GuessSync = {
     guess = {client: currentTime + GuessSync.skew, requestTime: totRequestTime/2};
     GuessSync.guesses++;
 
-    if (GuessSync.guesses >= GuessSync.maxGuesses) {
+    if (GuessSync.guesses >= GuessSync.maxGuesses){
       var error = Math.abs(GuessSync.skewError);
 
-      if (error < GuessSync.maxAllowedError) {
+      if (error < GuessSync.maxAllowedError){
         GuessSync.clock_skew = GuessSync.skew;
       }else{
         GuessSync.maxGuesses = GuessSync.maxGuesses + GuessSync.maxGuesses/10;
