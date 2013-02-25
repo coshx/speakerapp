@@ -57,8 +57,8 @@ var Play = {
       var difference = currentTimeShouldBe - actualTime  ;
       Play.playerLag += difference
       Play.audio.currentTime = currentTimeShouldBe + Play.playerLag/4 ;
-      if(Math.abs(difference)*1000>0.1){
-        setTimeout(Play.fineTunePlayerLag, 100);
+      if(Math.abs(difference)*1000>2){
+        setTimeout(Play.fineTunePlayerLag, 500);
         return false ;
       }
       $("#pause").removeClass("disabled");
