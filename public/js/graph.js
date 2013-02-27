@@ -75,7 +75,7 @@ var Plot = {
     }
     jstat.plot(x, dy, {main: 'd(Client Time)/dt'});
   },
-  skew: function() {
+  clockSkew: function() {
     var reqPlusSkew = _.map(_.zip(Graph.serverTimes, Graph.clientRequestTimes), function(t) {
       return t[0] - t[1];
     });
@@ -95,7 +95,7 @@ var Plot = {
 
     var estSkew = avgReqPlusSkew - ((avgReqPlusSkew+avgRespMinusSkew)/2);
 
-    $('#skew').text('avg request + skew: ' + avgReqPlusSkew 
+    $('#clockSkew').text('avg request + skew: ' + avgReqPlusSkew
                     + ', avg response - skew: ' + avgRespMinusSkew
                     + ', If req==resp, skew: ' + estSkew);
   },

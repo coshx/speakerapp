@@ -5,6 +5,8 @@ a, div#skew, div#error{
   color: #22f;
 }
 
-a.disabled {
+a.disabled,select.disabled {
   color: #ddd;
 }
+
+

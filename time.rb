@@ -53,7 +53,7 @@ get '/song_info' do
 end
 
 post '/post_start_time' do
-  logger.info("{id: #{params[:id]}, latency: #{params[:latency]}, skew: #{params[:skew]}}" )
+  logger.info("{id: #{params[:id]}, latency: #{params[:latency]}, skew: #{params[:clockSkew]}}" )
 end
 
 get '/guess' do
@@ -69,6 +69,6 @@ get '/guess' do
   current_time = Time.now.to_f * 1000
   skew = (current_time - client_time - request_time)
 
-  {:skew => skew}.to_json
+  {:clockSkew => skew}.to_json
 end
 

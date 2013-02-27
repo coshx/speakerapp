@@ -1,6 +1,6 @@
 var GuessSync = {
   guesses: 0,
-  skew: 0,
+  clockSkew: 0,
   maxGuesses: 10,
   lastGuessTime: 0,
   skewError: 0,
@@ -23,18 +23,18 @@ var GuessSync = {
     var currentTime, totRequestTime, guess;
     currentTime = new Date().getTime();
     totRequestTime = currentTime - GuessSync.lastGuessTime;
-    GuessSync.skew = GuessSync.skew + (0.63*serverResponse.skew);
-    GuessSync.skewError = serverResponse.skew;
+    GuessSync.clockSkew = GuessSync.clockSkew + (0.63*serverResponse.clockSkew);
+    GuessSync.skewError = serverResponse.clockSkew;
 
     GuessSync.lastGuessTime = currentTime;
-    guess = {client: currentTime + GuessSync.skew, requestTime: totRequestTime/2};
+    guess = {client: currentTime + GuessSync.clockSkew, requestTime: totRequestTime/2};
     GuessSync.guesses++;
 
     if (GuessSync.guesses >= GuessSync.maxGuesses){
       var error = Math.abs(GuessSync.skewError);
 
       if (error < GuessSync.maxAllowedError){
-        GuessSync.clock_skew = GuessSync.skew;
+        GuessSync.clock_skew = GuessSync.clockSkew;
       }else{
         GuessSync.maxGuesses = GuessSync.maxGuesses + GuessSync.maxGuesses/10;
         GuessSync.getSkew(GuessSync.maxGuesses);
